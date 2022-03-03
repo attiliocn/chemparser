@@ -155,6 +155,44 @@ class GaussianOutput(NaturalBondOrbital7):
                             nbo_output.append(current_line)
             raise PropertyNotFoundError("Output does not contain NBO7 output")
 
+    def get_nmr_tensors(self):
+        '''Fetches NMR Magnetic shielding tensors from Gaussian Output. 
+
+        Args:
+            None
+
+        Returns:
+            Dict of NMR Shielding Tensors
+
+        Raises:
+            PropertyNotFoundError: When NMR calculation is not present in Gaussian16 output file. 
+        '''
+        regex_tensors = re.compile('\s*([A-Z]{2})=\s*(-?[0-9]+.[0-9]+)')
+        tensors = dict()
+        with open(self.output_file) as output:
+            for line in output:
+                if re.search('SCF GIAO Magnetic shielding tensor', line):
+                    while True:
+                        current_line = output.readline()
+                        if re.search('\s+[0-9]+\s+[A-Za-z]{1,2}\s+Isotropic', current_line):
+                            atom_number = int(current_line.split()[0])
+                            atom_tensors = dict()
+                            for _ in range(4):
+                                current_line = output.readline()
+                                if not re.search('Eigenvalues', current_line):
+                                    all_tensors = regex_tensors.findall(current_line)
+                                    for tensor in all_tensors:
+                                        atom_tensors[tensor[0]] = float(tensor[1])
+                                    tensors[atom_number] = atom_tensors
+                        else:
+                            break
+        if tensors:
+            return tensors
+        else:
+            raise PropertyNotFoundError("Output does not contain NMR Shielding Tensors")
+
+                            
+
     def get_thermochemistry(self) -> dict:
         pass
 
