@@ -127,3 +127,18 @@ def atom_from_atomic_number(atomic_number: int) -> str:
     atom = list(periodic_table)[atomic_number]
     return atom
 
+def atomic_number_from_atom(atom: str) -> int:
+    atom_from_periodic_table = list(periodic_table)
+    return atom_from_periodic_table.index(atom)
+
+def electron_counter(element_list:list) -> int:
+    electron_count = 0
+    for element in element_list: 
+        if element in periodic_table:
+            electron_count += atomic_number_from_atom(element)
+        else:
+            raise KeyError(f"Element {element} not found in the Period Table")
+    return electron_count
+
+
+
