@@ -2,6 +2,8 @@
 import re
 import os
 
+import numpy as np
+
 from .exceptions import *
 from .tools import *
 from .parser_nbo7 import NaturalBondOrbital7
@@ -197,7 +199,39 @@ class GaussianOutput(NaturalBondOrbital7):
         pass
 
     def get_geometries(self):
-        pass
+        '''Fetches al XYZ Coordinates from Gaussian Output. 
+
+        Args:
+            None
+
+        Returns:
+            List of numpy arrays containing the molecular geometries
+
+        Raises:
+            PropertyNotFoundError: When no geometry is found in the output file 
+        '''
+        geometries = list()
+        with open(self.output_file) as output:
+            for line in output:
+                if re.search('Coordinates \(Angstroms\)', line):
+                    current_geometry = list()
+                    output.readline()
+                    output.readline()
+                    while True:
+                        current_line = output.readline()
+                        if re.search('\s-{69}', current_line):
+                            break
+                        else:
+                            current_geometry.append(current_line.strip().split())
+                    current_geometry = np.array(current_geometry)[:,[1,3,4,5]] # Select only the columns: atomic number and x, y and z coordinates
+                    current_geometry[:,0] = [atom_from_atomic_number(int(i)) for i in current_geometry[:,0]] # Replace atomic number for element
+                    geometries.append(current_geometry)
+        if geometries:
+            return geometries
+        else:
+            raise PropertyNotFoundError("Output does not contain any geometry information")
+
+
 
     def write_geometry(self):
         pass
