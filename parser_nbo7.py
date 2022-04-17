@@ -86,7 +86,7 @@ class NaturalBondOrbital7():
             regex_delocalizations = re.compile('[0-9]+\([a-z]\)')
 
             if regex_nbo_identifier.search(nbo_output):
-                split_nbo_content = re.sub('[()]', '', nbo_output).split()
+                split_nbo_content = re.sub('[()]', ' ', nbo_output).split()
                 nbo_number = split_nbo_content[0].replace('.', '')
                 nbo_type = split_nbo_content[1]
                 nbo_bond_order = split_nbo_content[2]
@@ -99,6 +99,7 @@ class NaturalBondOrbital7():
                     'nbo_type': str(nbo_type),
                     'nbo_bond_order': int(nbo_bond_order),
                     'nbo_occupancy': float(nbo_occupancy),
+                    'nbo_energy': float(nbo_energy),
                     'nbo_participants': [int(re.sub('[a-zA-Z\s]*','',i)) for i in nbo_participants],
                     'nbo_delocalizations': nbo_delocalizations
                 }
