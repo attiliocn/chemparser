@@ -24,6 +24,7 @@ class NaturalBondOrbital7():
             natural_population_analysis = list()
             for line in output:
                 if re.search('Summary of Natural Population Analysis', line):
+                    regex_npa = re.compile('([A-Z][a-z]?)\s{0,2}([0-9]{1,3})\s*(-?[0-9]*\.[0-9]*)\s*(-?[0-9]*\.[0-9]*)\s*(-?[0-9]*\.[0-9]*)\s*(-?[0-9]*\.[0-9]*)\s*(-?[0-9]*\.[0-9]*)')
                     for _ in range(5):
                         output.readline()
                     while True:
@@ -31,7 +32,7 @@ class NaturalBondOrbital7():
                         if re.search('={68}', current_line):
                             break
                         else:
-                            current_atom_npa = current_line.split()
+                            current_atom_npa = regex_npa.findall(current_line)[0]
                             atom_natural_population = {
                                 'atom': str(current_atom_npa[0]),
                                 'atom_number': int(current_atom_npa[1]),
