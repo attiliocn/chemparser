@@ -98,6 +98,45 @@ class GaussianOutput(NaturalBondOrbital7):
                         return(isotropic_polarizability, anisotropic_polarizability)
         raise PropertyNotFoundError("Output does not contain dipole polarizability information")
 
+    def get_hirshfeld_charges(self):
+        '''Fetches the charges from Hirshfeld population analysis from Gaussian16 output file. 
+
+        Args:
+            None
+
+        Returns:
+            Dict containing charges for all atoms (currently not available) and charges with 
+            hydrogens summed into heavy atoms. The dict_keys are 0-indexed atom numbers 
+
+        Raises:
+            PropertyNotFoundError: When population analysis using Hirshfeld is not present on the output file. 
+        '''
+        hirshfeld_charges = {
+            'all_atoms': {},
+            'without_H': {}
+        }
+        with open(self.output_file) as output:
+            for line in output:
+                if re.search('Hirshfeld charges with hydrogens summed into heavy atoms:', line):
+                    output.readline()
+                    while True:
+                        hirshfeld_output = output.readline()
+                        if re.search("\s+[0-9]+\s+[A-Za-z]+\s+-?[0-9]+\.[0-9]+", hirshfeld_output):
+                            hirshfeld_output_split = hirshfeld_output.split()
+                            atom_number = int(hirshfeld_output_split[0])
+                            hirshfeld_charges['without_H'][atom_number-1] = {
+                                'atom_number': atom_number,
+                                'element': hirshfeld_output_split[1],
+                                'hirshfeld_charge': float(hirshfeld_output_split[2]),
+                                'cm5_charge': float(hirshfeld_output_split[3])
+                            }
+                        else:
+                            break
+        if hirshfeld_charges['without_H']:
+            return hirshfeld_charges
+        else: 
+            raise PropertyNotFoundError("Output does not contain Hirshfeld charges")
+    
     def get_orbitals_energies(self) -> tuple:
         '''Fetches the molecular orbitals energies from Gaussian16 output file. 
 
