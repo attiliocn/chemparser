@@ -51,6 +51,8 @@ class NaturalBondOrbital7():
             raise PropertyNotFoundError("Output does not contain NPA analysis")
 
     def get_natural_bond_orbitals(self) -> list:
+        # TODO: make this parser compatible with more than one molecular unity
+        # 
         '''Fetches natural orbitals from NBO7 output. 
 
         Args:
@@ -83,7 +85,7 @@ class NaturalBondOrbital7():
             # regular expressions 
             regex_nbo_identifier = re.compile('^[0-9]+\. ')
             regex_nbo_float = re.compile('-?[0-9]+\.[0-9]+')
-            regex_nbo_participants = re.compile('[A-Z]\s+[0-9]+')
+            regex_nbo_participants = re.compile('[A-Za-z]+\s+[0-9]+')
             regex_delocalizations = re.compile('[0-9]+\([a-z]\)')
 
             if regex_nbo_identifier.search(nbo_output):
