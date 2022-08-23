@@ -51,8 +51,6 @@ class NaturalBondOrbital7():
             raise PropertyNotFoundError("Output does not contain NPA analysis")
 
     def get_natural_bond_orbitals(self) -> list:
-        # TODO: make this parser compatible with more than one molecular unity
-        # 
         '''Fetches natural orbitals from NBO7 output. 
 
         Args:
@@ -72,7 +70,7 @@ class NaturalBondOrbital7():
                         output.readline()
                     while True:
                         current_line = output.readline()
-                        if re.search('^ +-{31}', current_line):
+                        if re.search('Normal termination of Gaussian 16', current_line):# re.search('^ +-{31}', current_line):
                             break
                         else:
                             natural_bond_orbitals_raw.append(current_line.strip())
@@ -85,7 +83,7 @@ class NaturalBondOrbital7():
             # regular expressions 
             regex_nbo_identifier = re.compile('^[0-9]+\. ')
             regex_nbo_float = re.compile('-?[0-9]+\.[0-9]+')
-            regex_nbo_participants = re.compile('[A-Za-z]+\s+[0-9]+')
+            regex_nbo_participants = re.compile('[A-Za-z]+\s*([0-9]+)')
             regex_delocalizations = re.compile('[0-9]+\([a-z]\)')
 
             if regex_nbo_identifier.search(nbo_output):
@@ -103,7 +101,7 @@ class NaturalBondOrbital7():
                     'nbo_bond_order': int(nbo_bond_order),
                     'nbo_occupancy': float(nbo_occupancy),
                     'nbo_energy': float(nbo_energy),
-                    'nbo_participants': [int(re.sub('[a-zA-Z\s]*','',i)) for i in nbo_participants],
+                    'nbo_participants': [int(i) for i in nbo_participants],
                     'nbo_delocalizations': nbo_delocalizations
                 }
                 all_nbo_parsed.append(nbo_parsed)
