@@ -70,7 +70,7 @@ class NaturalBondOrbital7():
                         output.readline()
                     while True:
                         current_line = output.readline()
-                        if re.search('Normal termination of Gaussian 16', current_line):# re.search('^ +-{31}', current_line):
+                        if re.search('The archive entry', current_line):# re.search('^ +-{31}', current_line):
                             break
                         else:
                             natural_bond_orbitals_raw.append(current_line.strip())
