@@ -156,14 +156,15 @@ class GaussianOutput(NaturalBondOrbital7):
                             output.readline()
                         occupied_orbitals_eigenvalues = list()
                         empty_orbitals_eigenvalues = list()
+                        regex_energy = re.compile('-?[0-9]+.[0-9]+')
                         while True:
                             current_line = output.readline()
                             if re.search('Alpha  occ. eigenvalues', current_line):
-                                energies_from_line = current_line.split()[4:]
+                                energies_from_line = regex_energy.findall(current_line)
                                 for energy in energies_from_line:
                                     occupied_orbitals_eigenvalues.append(float(energy))
                             elif re.search('Alpha virt. eigenvalues', current_line):
-                                energies_from_line = current_line.split()[4:]
+                                energies_from_line = regex_energy.findall(current_line)
                                 for energy in energies_from_line:
                                     empty_orbitals_eigenvalues.append(float(energy))
                             else:
