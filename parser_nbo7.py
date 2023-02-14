@@ -109,4 +109,89 @@ class NaturalBondOrbital7():
                 nbo_delocalizations = regex_delocalizations.findall(nbo_output)
                 for delocalization in nbo_delocalizations:
                     all_nbo_parsed[-1]['nbo_delocalizations'].append(delocalization)
-        return all_nbo_parsed 
+        return all_nbo_parsed
+
+    def get_perturbation_analysis(self):
+        '''
+        '''
+        with open(self.output_file) as output:
+            perturbation_raw = list()
+            for line in output:
+                if re.search('SECOND ORDER PERTURBATION THEORY', line):
+                    for _ in range(7):
+                        output.readline()
+                    while True:
+                        perturbation_output = output.readline().strip()
+                        if re.search('NATURAL BOND ORBITALS', perturbation_output):
+                            break
+                        elif re.search('^[0-9]+\. ', perturbation_output):
+                            #print(perturbation_output)
+                            perturbation_raw.append(perturbation_output)
+        
+        perturbation_regex = re.compile('([0-9]+\.) (.*) ([0-9]+\.) (.*) ([0-9]+\.[0-9]+) +([0-9]+\.[0-9]+) +([0-9]+\.[0-9]+)')
+        perturbations_parsed = list()
+        for entry in perturbation_raw:
+            #print(entry)
+            perturbation_data = perturbation_regex.findall(entry)[0]
+            perturbation_data = list(perturbation_data)
+            perturbation_data = [i.strip() for i in perturbation_data]
+            #print(perturbation_data)
+
+            donor_orbital_number = int(perturbation_data[0].replace('.',''))
+            donor_orbital_raw = perturbation_data[1]
+            #print(donor_orbital_raw)
+            donor_orbital = self.parse_nbo_participants(self,donor_orbital_raw)
+
+            acceptor_orbital_number = int(perturbation_data[2].replace('.',''))
+            acceptor_orbital_raw = perturbation_data[3]
+            acceptor_orbital = self.parse_nbo_participants(self,acceptor_orbital_raw)
+
+            energy = float(perturbation_data[4])
+            E_term = float(perturbation_data[5])
+            F_term = float(perturbation_data[6])
+
+            perturbation_parsed = {
+                'donor orbital': donor_orbital_number,
+                'donor type': donor_orbital['nbo_type'],
+                'donor bond order': donor_orbital['nbo_bond_order'],
+                'donor participants': donor_orbital['nbo_participants'],
+                'acceptor orbital': acceptor_orbital_number,
+                'acceptor type': acceptor_orbital['nbo_type'],
+                'acceptor bond order': acceptor_orbital['nbo_bond_order'],
+                'acceptor participants': acceptor_orbital['nbo_participants'],
+                'energy': energy,
+                'E_term': E_term,
+                'F_term': F_term,
+            }
+            perturbations_parsed.append(perturbation_parsed)
+        return perturbations_parsed
+
+
+
+    @staticmethod
+    def parse_nbo_participants(self, nbo_string):
+        # regular expressions 
+        regex_nbo_float = re.compile('-?[0-9]+\.[0-9]+')
+        regex_nbo_participants = re.compile('[A-Za-z]+\s*([0-9]+)')
+        regex_delocalizations = re.compile('[0-9]+\([a-z]\)')
+
+        split_nbo_content = re.sub('[()]', ' ', nbo_string).split()
+        #nbo_number = split_nbo_content[0].replace('.', '')
+        nbo_type = split_nbo_content[0]
+        nbo_bond_order = split_nbo_content[1]
+        #nbo_occupancy, nbo_energy = regex_nbo_float.findall(nbo_string)
+        nbo_participants = regex_nbo_participants.findall(nbo_string)
+        nbo_delocalizations = regex_delocalizations.findall(nbo_string)
+
+        nbo_parsed = {
+            #'nbo_number': int(nbo_number),
+            'nbo_type': str(nbo_type),
+            'nbo_bond_order': int(nbo_bond_order),
+            #'nbo_occupancy': float(nbo_occupancy),
+            #'nbo_energy': float(nbo_energy),
+            'nbo_participants': [int(i) for i in nbo_participants],
+            'nbo_delocalizations': nbo_delocalizations
+            }
+        #print(nbo_parsed)
+        return nbo_parsed
+                    
