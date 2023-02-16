@@ -70,39 +70,36 @@ class NaturalBondOrbital7():
                         output.readline()
                     while True:
                         current_line = output.readline()
-                        if re.search('The archive entry', current_line):# re.search('^ +-{31}', current_line):
+                        if re.search('NBO analysis completed', current_line):# re.search('^ +-{31}', current_line):
                             break
                         else:
                             natural_bond_orbitals_raw.append(current_line.strip())
             
         if not natural_bond_orbitals_raw:
             raise PropertyNotFoundError("Output does not contain NBO Orbitals Summary")
+        
+        # regular expressions 
+        regex_nbo_parser = re.compile('^([0-9]+)\. +(CR|LP|BD|BD\*|RY) +([0-9]+) +([a-zA-Z]+.*[0-9]+).*(-?[0-9]+\.[0-9]+) +(-?[0-9]+\.[0-9]+)')
+        #regex_nbo_identifier = re.compile('^[0-9]+\. ')
+        #regex_nbo_float = re.compile('-?[0-9]+\.[0-9]+')
+        #regex_nbo_participants = re.compile('[A-Za-z]+\s*([0-9]+)')
+        regex_delocalizations = re.compile('[0-9]+\([a-z]\)')
 
-        all_nbo_parsed = list()                
+        all_nbo_parsed = list()               
         for nbo_output in natural_bond_orbitals_raw:
-            # regular expressions 
-            regex_nbo_identifier = re.compile('^[0-9]+\. ')
-            regex_nbo_float = re.compile('-?[0-9]+\.[0-9]+')
-            regex_nbo_participants = re.compile('[A-Za-z]+\s*([0-9]+)')
-            regex_delocalizations = re.compile('[0-9]+\([a-z]\)')
+            nbo_string = re.sub('[()-]', ' ', nbo_output)
+            nbo_string_parsed = regex_nbo_parser.findall(nbo_string)
 
-            if regex_nbo_identifier.search(nbo_output):
-                split_nbo_content = re.sub('[()]', ' ', nbo_output).split()
-                nbo_number = split_nbo_content[0].replace('.', '')
-                nbo_type = split_nbo_content[1]
-                nbo_bond_order = split_nbo_content[2]
-                nbo_occupancy, nbo_energy = regex_nbo_float.findall(nbo_output)
-                nbo_participants = regex_nbo_participants.findall(nbo_output)
-                nbo_delocalizations = regex_delocalizations.findall(nbo_output)
-
+            if nbo_string_parsed:
+                nbo_string_parsed = nbo_string_parsed[0]
                 nbo_parsed = {
-                    'nbo_number': int(nbo_number),
-                    'nbo_type': str(nbo_type),
-                    'nbo_bond_order': int(nbo_bond_order),
-                    'nbo_occupancy': float(nbo_occupancy),
-                    'nbo_energy': float(nbo_energy),
-                    'nbo_participants': [int(i) for i in nbo_participants],
-                    'nbo_delocalizations': nbo_delocalizations
+                    'nbo_number': int(nbo_string_parsed[0]),
+                    'nbo_type': nbo_string_parsed[1],
+                    'nbo_bond_order': int(nbo_string_parsed[2]),
+                    'nbo_occupancy': float(nbo_string_parsed[4]),
+                    'nbo_energy': float(nbo_string_parsed[5]),
+                    'nbo_participants': [int(i) for i in re.sub('[A-Za-z]','',nbo_string_parsed[3]).split()],
+                    'nbo_delocalizations': regex_delocalizations.findall(nbo_output)
                 }
                 all_nbo_parsed.append(nbo_parsed)
             else:
