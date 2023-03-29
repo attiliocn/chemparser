@@ -4,6 +4,7 @@ import re
 from .exceptions import *
 
 class NaturalBondOrbital7():
+    #TODO -> split alpha and betha outputs when multiplicity != singlet
     def __init__(self,output_file):
         self.output_file = output_file
     
@@ -87,18 +88,20 @@ class NaturalBondOrbital7():
 
         all_nbo_parsed = list()               
         for nbo_output in natural_bond_orbitals_raw:
-            nbo_string = re.sub('[()-]', ' ', nbo_output)
+            nbo_string = re.sub('[()]', ' ', nbo_output)
+            #print(nbo_string)
             nbo_string_parsed = regex_nbo_parser.findall(nbo_string)
 
             if nbo_string_parsed:
                 nbo_string_parsed = nbo_string_parsed[0]
+                #print(nbo_string_parsed)
                 nbo_parsed = {
                     'nbo_number': int(nbo_string_parsed[0]),
                     'nbo_type': nbo_string_parsed[1],
                     'nbo_bond_order': int(nbo_string_parsed[2]),
                     'nbo_occupancy': float(nbo_string_parsed[4]),
                     'nbo_energy': float(nbo_string_parsed[5]),
-                    'nbo_participants': [int(i) for i in re.sub('[A-Za-z]','',nbo_string_parsed[3]).split()],
+                    'nbo_participants': [int(i) for i in re.sub('[A-Za-z-]','',nbo_string_parsed[3]).split()],
                     'nbo_delocalizations': regex_delocalizations.findall(nbo_output)
                 }
                 all_nbo_parsed.append(nbo_parsed)
