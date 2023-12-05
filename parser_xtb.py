@@ -22,6 +22,7 @@ class xtbOutput():
             parsed_fukui = {}
             for content in fukui_content:
                 atom_number, element = re.search('([0-9]+)([a-zA-Z]{1,2})', content[0]).groups()
+                atom_number = int(atom_number)
                 parsed_fukui[atom_number] = {
                     'element': element,
                     'f(+)': float(content[1]),
