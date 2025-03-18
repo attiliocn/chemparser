@@ -25,7 +25,7 @@ class NaturalBondOrbital7():
             natural_population_analysis = list()
             for line in output:
                 if re.search('Summary of Natural Population Analysis', line):
-                    regex_npa = re.compile('([A-Z][a-z]?)\s{0,2}([0-9]{1,3})\s*(-?[0-9]*\.[0-9]*)\s*(-?[0-9]*\.[0-9]*)\s*(-?[0-9]*\.[0-9]*)\s*(-?[0-9]*\.[0-9]*)\s*(-?[0-9]*\.[0-9]*)')
+                    regex_npa = re.compile(r'([A-Z][a-z]?)\s{0,2}([0-9]{1,3})\s*(-?[0-9]*\.[0-9]*)\s*(-?[0-9]*\.[0-9]*)\s*(-?[0-9]*\.[0-9]*)\s*(-?[0-9]*\.[0-9]*)\s*(-?[0-9]*\.[0-9]*)')
                     for _ in range(5):
                         output.readline()
                     while True:
@@ -80,11 +80,11 @@ class NaturalBondOrbital7():
             raise PropertyNotFoundError("Output does not contain NBO Orbitals Summary")
         
         # regular expressions 
-        regex_nbo_parser = re.compile('^([0-9]+)\. +(CR|LP|BD|BD\*|RY) +([0-9]+) +([a-zA-Z]+.*[0-9]+).*(-?[0-9]+\.[0-9]+) +(-?[0-9]+\.[0-9]+)')
+        regex_nbo_parser = re.compile(r'^([0-9]+)\. +(LV|CR|LP|BD|BD*|RY) +([0-9]+) +([a-zA-Z]+.*[0-9]+).*(-?[0-9]+\.[0-9]+) +(-?[0-9]+\.[0-9]+)')
         #regex_nbo_identifier = re.compile('^[0-9]+\. ')
         #regex_nbo_float = re.compile('-?[0-9]+\.[0-9]+')
         #regex_nbo_participants = re.compile('[A-Za-z]+\s*([0-9]+)')
-        regex_delocalizations = re.compile('[0-9]+\([a-z]\)')
+        regex_delocalizations = re.compile(r'[0-9]+\([a-z]\)')
 
         all_nbo_parsed = list()               
         for nbo_output in natural_bond_orbitals_raw:
@@ -128,7 +128,7 @@ class NaturalBondOrbital7():
                             #print(perturbation_output)
                             perturbation_raw.append(perturbation_output)
         
-        perturbation_regex = re.compile('([0-9]+\.) (.*) ([0-9]+\.) (.*) ([0-9]+\.[0-9]+) +([0-9]+\.[0-9]+) +([0-9]+\.[0-9]+)')
+        perturbation_regex = re.compile(r'([0-9]+\.) (.*) ([0-9]+\.) (.*) ([0-9]+\.[0-9]+) +([0-9]+\.[0-9]+) +([0-9]+\.[0-9]+)')
         perturbations_parsed = list()
         for entry in perturbation_raw:
             #print(entry)
@@ -171,9 +171,9 @@ class NaturalBondOrbital7():
     @staticmethod
     def parse_nbo_participants(self, nbo_string):
         # regular expressions 
-        regex_nbo_float = re.compile('-?[0-9]+\.[0-9]+')
-        regex_nbo_participants = re.compile('[A-Za-z]+\s*([0-9]+)')
-        regex_delocalizations = re.compile('[0-9]+\([a-z]\)')
+        regex_nbo_float = re.compile(r'-?[0-9]+\.[0-9]+')
+        regex_nbo_participants = re.compile(r'[A-Za-z]+\s*([0-9]+)')
+        regex_delocalizations = re.compile(r'[0-9]+\([a-z]\)')
 
         split_nbo_content = re.sub('[()]', ' ', nbo_string).split()
         #nbo_number = split_nbo_content[0].replace('.', '')
