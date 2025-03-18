@@ -80,7 +80,7 @@ class NaturalBondOrbital7():
             raise PropertyNotFoundError("Output does not contain NBO Orbitals Summary")
         
         # regular expressions 
-        regex_nbo_parser = re.compile(r'^([0-9]+)\. +(LV|CR|LP|BD|BD*|RY) +([0-9]+) +([a-zA-Z]+.*[0-9]+).*(-?[0-9]+\.[0-9]+) +(-?[0-9]+\.[0-9]+)')
+        regex_nbo_parser = re.compile(r'^([0-9]+)\. +(LV|CR|LP|BD|BD\*|RY) +([0-9]+) +([a-zA-Z]+.*[0-9]+).*(-?[0-9]+\.[0-9]+) +(-?[0-9]+\.[0-9]+)')
         #regex_nbo_identifier = re.compile('^[0-9]+\. ')
         #regex_nbo_float = re.compile('-?[0-9]+\.[0-9]+')
         #regex_nbo_participants = re.compile('[A-Za-z]+\s*([0-9]+)')
